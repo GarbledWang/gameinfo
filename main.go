@@ -22,9 +22,13 @@ var page = 1
 
 func main(){
     var db,err = sql.Open("sqlite3","./game")
+  	if err!= nil{
+		fmt.Println(err)
+		return
+	}
     defer db.Close()
     for{
-        if parse(page) {
+        if parse(db,page) {
             page++
         }else{
             break
@@ -32,7 +36,7 @@ func main(){
     }
 }
 
-func parse(db *DB,page int) bool{
+func parse(db *sql.DB,page int) bool{
     doc,err := goquery.NewDocument("http://games.tgbus.com/default.aspx?page="+strconv.Itoa(page)+"&elite=0&keyword=&type=0&tag=0&nid=40");
     if err!=nil {
         fmt.Println(err)
@@ -64,9 +68,9 @@ func parse(db *DB,page int) bool{
             })
             stmt,err := db.Prepare("INSERT INTO gameinfo(name,gametype,author,pubtime,version,recommend,desc) values(?,?,?,?,?,?,?)")
             if err!=nil {
-                return false;
-            }
-            stme.Exec(info.name,info.gametype,info.author,info.pubtime,info.version,info.recommend,info.desc)
+            	fmt.Println(err)
+			}
+            stmt.Exec(info.name,info.gametype,info.author,info.pubtime,info.version,info.recommend,info.desc)
             fmt.Println(info)
         })
         return true   
